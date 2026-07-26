@@ -1,0 +1,93 @@
+:root {
+    --bg: #0A0810;
+    --surface: #150F22;
+    --primary-accent: #9B4DFF;
+    --accent-light: #D94FE0;
+    --deep-purple: #3D2166;
+    --accent: #F2C83E;
+    --text: #F5F1FA;
+    --text-muted: #A69BC0;
+    --radius: 14px;
+}
+
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+/* React Flow — dark theme overrides */
+.react-flow {
+    background-color: var(--bg);
+  }
+  
+  .react-flow__node {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--deep-purple);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  
+  .react-flow__node.selected {
+    border-color: var(--primary-accent);
+    box-shadow: 0 0 0 1px var(--primary-accent);
+  }
+  
+  .react-flow__controls button {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--deep-purple);
+  }
+  
+  .react-flow__controls button:hover {
+    background: var(--deep-purple);
+  }
+  
+  .react-flow__edge-path {
+    stroke: var(--primary-accent);
+  }
+
+.react-flow__node.start-node {
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+  }
+  
+  .react-flow__node.start-node.selected {
+    border: none;
+    box-shadow: none;
+  }
+  
+  .start-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .start-node__label {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: lowercase;
+    line-height: 1;
+  }
+  
+  .start-node__dot {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  
+  .start-node__handle {
+    opacity: 0;
+    bottom: -4px;
+  }
