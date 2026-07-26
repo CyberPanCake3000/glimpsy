@@ -21,6 +21,7 @@ import StartNode from '@/components/nodes/StartNode';
 import EventNode from '@/components/nodes/EventNode';
 import ActionNode from '@/components/nodes/ActionNode';
 import Toolbar, { type Tool } from '@/components/Toolbar';
+import { TooltipProvider, useTooltip } from '@/contexts/TooltipContext';
 
 const nodeTypes = {
   start: StartNode,
@@ -44,6 +45,7 @@ function CanvasInner() {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [activeTool, setActiveTool] = useState<Tool>(null);
   const { screenToFlowPosition } = useReactFlow();
+  const { closeTooltip } = useTooltip();
 
   const onConnect = useCallback(
     (connection: Connection) => setEdges((eds) => addEdge(connection, eds)),
@@ -52,6 +54,7 @@ function CanvasInner() {
 
   const onPaneClick = useCallback(
     (event: React.MouseEvent) => {
+      closeTooltip();
       if (!activeTool || activeTool === 'remove') return;
 
       const position = screenToFlowPosition({
@@ -70,7 +73,7 @@ function CanvasInner() {
         },
       ]);
     },
-    [activeTool, setNodes, screenToFlowPosition],
+    [activeTool, setNodes, screenToFlowPosition, closeTooltip],
   );
 
   const isValidConnection = (connection: Connection) =>
@@ -104,45 +107,47 @@ function CanvasInner() {
   );
 
   return (
-    <ReactFlow
-      isValidConnection={isValidConnection}
-      nodeOrigin={[0.5, 0.5]}
-      nodeTypes={nodeTypes}
-      nodes={nodes}
-      onNodesChange={onNodesChange}
-      onNodeClick={onNodeClick}
-      onPaneClick={onPaneClick}
-      onEdgeClick={onEdgeClick}
-      fitView
-      className={
-        activeTool === 'event' || activeTool === 'action'
-          ? 'canvas--drawing'
-          : activeTool === 'remove'
-            ? 'canvas--removing'
-            : undefined
-      }
-      edges={edges}
-      onConnect={onConnect}
-      onEdgesChange={onEdgesChange}
-      defaultEdgeOptions={{
-      style: { stroke: 'var(--primary-accent)', strokeWidth: 2 }, interactionWidth: 20,
-  }}
-  connectionLineStyle={{ stroke: 'var(--primary-accent)', strokeWidth: 2 }}
-    >
-      <Background gap={20} size={1} color="var(--text-muted)" />
-      <Controls />
+      <ReactFlow
+          isValidConnection={isValidConnection}
+          nodeOrigin={[0.5, 0.5]}
+          nodeTypes={nodeTypes}
+          nodes={nodes}
+          onNodesChange={onNodesChange}
+          onNodeClick={onNodeClick}
+          onPaneClick={onPaneClick}
+          onEdgeClick={onEdgeClick}
+          fitView
+          className={
+              activeTool === 'event' || activeTool === 'action'
+                  ? 'canvas--drawing'
+                  : activeTool === 'remove'
+                      ? 'canvas--removing'
+                      : undefined
+          }
+          edges={edges}
+          onConnect={onConnect}
+          onEdgesChange={onEdgesChange}
+          defaultEdgeOptions={{
+              style: { stroke: 'var(--primary-accent)', strokeWidth: 2 }, interactionWidth: 20,
+          }}
+          connectionLineStyle={{ stroke: 'var(--primary-accent)', strokeWidth: 2 }}
+      >
+          <Background gap={20} size={1} color="var(--text-muted)" />
+          <Controls />
 
-      <Panel position="top-left">
-        <Toolbar activeTool={activeTool} onSelect={setActiveTool} />
-      </Panel>
-    </ReactFlow>
+          <Panel position="top-left">
+              <Toolbar activeTool={activeTool} onSelect={setActiveTool} />
+          </Panel>
+      </ReactFlow>
   );
 }
 
 export default function Canvas() {
-  return (
-    <ReactFlowProvider>
-      <CanvasInner />
-    </ReactFlowProvider>
-  );
-}
+    return (
+      <ReactFlowProvider>
+        <TooltipProvider>
+          <CanvasInner />
+        </TooltipProvider>
+      </ReactFlowProvider>
+    );
+  }

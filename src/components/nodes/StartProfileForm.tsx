@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { emptyStartProfile, type StartProfile } from '@/types/startProfile';
+import { type StartProfile } from '@/types/startProfile';
 
 type Props = {
     profile: StartProfile;
@@ -9,12 +8,10 @@ type Props = {
     onClick?: (event: React.MouseEvent) => void;
   };
 
-export default function StartProfileForm({ onClick }: Props) {
-  const [profile, setProfile] = useState<StartProfile>(emptyStartProfile);
-
-  const updateField = (field: keyof StartProfile, value: string) => {
-    setProfile((prev) => ({ ...prev, [field]: value }));
-  };
+export default function StartProfileForm({ profile, onChange, onClick  }: Props) {
+    const updateField = (field: keyof StartProfile, value: string) => {
+        onChange({ ...profile, [field]: value });
+    };
 
   return (
     <form

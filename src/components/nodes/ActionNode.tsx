@@ -3,13 +3,15 @@
 import { useState } from 'react';
 import { Handle, NodeToolbar, Position, type NodeProps } from '@xyflow/react';
 import ActionForm from '@/components/nodes/ActionForm';
+import { useTooltip } from '@/contexts/TooltipContext';
 
-export default function ActionNode(_props: NodeProps) {
-  const [showTooltip, setShowTooltip] = useState(false);
+export default function ActionNode({ id }: NodeProps) {
+  const { activeNodeId, toggleTooltip } = useTooltip();
+  const showTooltip = activeNodeId === id;
   const [actionText, setActionText] = useState('');
 
   const handleClick = () => {
-    setShowTooltip((prev) => !prev);
+    toggleTooltip(id);
   };
 
   const handleFormClick = (event: React.MouseEvent) => {
