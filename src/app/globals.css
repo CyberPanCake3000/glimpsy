@@ -136,7 +136,9 @@ body {
     display: block;
     width: 22px;
     height: 22px;
-    background: #fff;
+    background: transparent;
+    border: 2px solid var(--text);
+    box-sizing: border-box;
     flex-shrink: 0;
 }
 
@@ -158,6 +160,21 @@ body {
 
 .toolbar__preview--square {
     border-radius: 4px;
+}
+
+.toolbar__icon {
+    font-size: 22px;
+    line-height: 1;
+    color: var(--text);
+    flex-shrink: 0;
+}
+
+.toolbar__btn--active .toolbar__icon {
+    color: var(--primary-accent);
+}
+
+.toolbar__btn--active .toolbar__preview {
+    background: var(--text);
 }
 
 /* --- Event / Action nodes --- */
@@ -198,6 +215,10 @@ body {
 .canvas--drawing .react-flow__pane {
     cursor: crosshair;
 }
+
+.canvas--removing {
+    cursor: crosshair;
+  }
 
 .node-handle {
     width: 1px;

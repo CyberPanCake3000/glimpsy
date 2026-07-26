@@ -13,6 +13,7 @@ import {
   type Node,
   addEdge,
   type Connection,
+  Edge
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -51,7 +52,7 @@ function CanvasInner() {
 
   const onPaneClick = useCallback(
     (event: React.MouseEvent) => {
-      if (!activeTool) return;
+      if (!activeTool || activeTool === 'remove') return;
 
       const position = screenToFlowPosition({
         x: event.clientX,
@@ -75,6 +76,24 @@ function CanvasInner() {
   const isValidConnection = (connection: Connection) =>
     connection.source !== connection.target;
 
+  const clearExceptStart = useCallback(() => {
+    setNodes((nds) => nds.filter((node) => node.type === 'start'));
+    setEdges([]);
+  }, [setNodes, setEdges]);
+
+  const onNodeClick = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      if (activeTool !== 'remove') return;
+      if (node.type === 'start') return;
+  
+      setNodes((nds) => nds.filter((n) => n.id !== node.id));
+      setEdges((eds) =>
+        eds.filter((e: Edge) => e.source !== node.id && e.target !== node.id),
+      );
+    },
+    [activeTool, setNodes, setEdges],
+  );
+
   return (
     <ReactFlow
       isValidConnection={isValidConnection}
@@ -82,9 +101,16 @@ function CanvasInner() {
       nodeTypes={nodeTypes}
       nodes={nodes}
       onNodesChange={onNodesChange}
+      onNodeClick={onNodeClick}
       onPaneClick={onPaneClick}
       fitView
-      className={activeTool ? 'canvas--drawing' : undefined}
+      className={
+        activeTool === 'event' || activeTool === 'action'
+          ? 'canvas--drawing'
+          : activeTool === 'remove'
+            ? 'canvas--removing'
+            : undefined
+      }
       edges={edges}
       onConnect={onConnect}
       onEdgesChange={onEdgesChange}
