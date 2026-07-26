@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
     "@xyflow/react": "^12.11.2",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",

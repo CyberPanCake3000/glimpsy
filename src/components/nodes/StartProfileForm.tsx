@@ -106,12 +106,12 @@ export default function StartProfileForm({ profile, onChange, onClick  }: Props)
       </label>
 
       <label className="start-profile-form__field">
-        <span>Additional Information</span>
+        <span>Your goals</span>
         <textarea
           className="form-control form-control-sm"
           rows={3}
-          value={profile.notes}
-          onChange={(e) => updateField('notes', e.target.value)}
+          value={profile.goals}
+          onChange={(e) => updateField('goals', e.target.value)}
         />
       </label>
     </form>

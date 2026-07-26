@@ -4,11 +4,13 @@ import { useState } from 'react';
 import { Handle, NodeToolbar, Position, type NodeProps } from '@xyflow/react';
 import ActionForm from '@/components/nodes/ActionForm';
 import { useTooltip } from '@/contexts/TooltipContext';
+import { useEmojiFromText } from '@/hooks/useEmojiFromText';
 
 export default function ActionNode({ id }: NodeProps) {
   const { activeNodeId, toggleTooltip } = useTooltip();
   const showTooltip = activeNodeId === id;
   const [actionText, setActionText] = useState('');
+  const { emoji, loading } = useEmojiFromText(actionText, 'action');
 
   const handleClick = () => {
     toggleTooltip(id);
@@ -30,7 +32,13 @@ export default function ActionNode({ id }: NodeProps) {
 
       <Handle type="target" position={Position.Left} className="node-handle" />
       <Handle type="source" position={Position.Right} className="node-handle" />
-      <div className="action-node__shape" />
+          <div className="action-node__shape">
+              {loading ? (
+                  <span className="node-shape__loading">…</span>
+              ) : emoji ? (
+                  <span className="node-shape__emoji">{emoji}</span>
+              ) : null}
+          </div>
     </div>
   );
 }

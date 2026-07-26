@@ -245,7 +245,21 @@ body {
 .action-node__shape {
     width: 48px;
     height: 48px;
-    background: #fff;
+    background: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.node-shape__emoji {
+    font-size: 24px;
+    line-height: 1;
+    user-select: none;
+}
+
+.node-shape__loading {
+    font-size: 14px;
+    color: var(--text-muted);
 }
 
 .event-node__shape {

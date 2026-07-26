@@ -7,7 +7,7 @@ export type StartProfile = {
     city: string;
     profession: string;
     activityLevel: string;
-    notes: string;
+    goals: string;
   };
   
   export const emptyStartProfile: StartProfile = {
@@ -19,5 +19,5 @@ export type StartProfile = {
     city: 'Moscow',
     profession: 'Lawyer',
     activityLevel: 'Low',
-    notes: 'I am a lawyer and I want to save money for my retirement.',
+    goals: 'I want to save money for my retirement.',
   };
