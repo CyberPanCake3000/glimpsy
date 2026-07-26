@@ -66,13 +66,17 @@ body {
 }
 
 .start-node {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+    position: relative;
+    width: 52px;
+    height: 52px;
 }
 
 .start-node__label {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
     font-size: 18px;
     font-weight: 700;
     color: var(--text);
@@ -81,13 +85,128 @@ body {
 }
 
 .start-node__dot {
-    width: 52px;
-    height: 52px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     background: var(--accent);
 }
 
 .start-node__handle {
     opacity: 0;
-    bottom: -4px;
+    width: 1px;
+    height: 1px;
+    background: transparent;
+    border: none;
+}
+
+/* --- Toolbar --- */
+.toolbar {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    background: var(--surface);
+    border: 1px solid var(--deep-purple);
+    border-radius: var(--radius);
+}
+
+.toolbar__btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 72px;
+    padding: 8px 10px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--text);
+}
+
+.toolbar__btn:hover {
+    background: var(--deep-purple);
+}
+
+.toolbar__btn--active {
+    border-color: var(--primary-accent);
+    background: var(--deep-purple);
+}
+
+.toolbar__preview {
+    display: block;
+    width: 22px;
+    height: 22px;
+    background: #fff;
+    flex-shrink: 0;
+}
+
+.toolbar__label {
+    font-size: 11px;
+    line-height: 1.2;
+    text-align: center;
+    color: var(--text-muted);
+    text-transform: lowercase;
+}
+
+.toolbar__btn--active .toolbar__label {
+    color: var(--text);
+}
+
+.toolbar__preview--circle {
+    border-radius: 50%;
+}
+
+.toolbar__preview--square {
+    border-radius: 4px;
+}
+
+/* --- Event / Action nodes --- */
+.react-flow__node.event-node,
+.react-flow__node.action-node {
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+}
+
+.react-flow__node.event-node.selected,
+.react-flow__node.action-node.selected {
+    box-shadow: none;
+}
+
+.event-node__shape,
+.action-node__shape {
+    width: 48px;
+    height: 48px;
+    background: #fff;
+}
+
+.event-node__shape {
+    border-radius: 50%;
+}
+
+.action-node__shape {
+    border-radius: 4px;
+}
+
+.react-flow__node.event-node.selected .event-node__shape,
+.react-flow__node.action-node.selected .action-node__shape {
+    outline: 2px solid var(--primary-accent);
+    outline-offset: 2px;
+}
+
+.canvas--drawing .react-flow__pane {
+    cursor: crosshair;
+}
+
+.node-handle {
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    background: transparent;
+    border: none;
+}
+
+.react-flow__node:hover .node-handle {
+    opacity: 1;
 }
