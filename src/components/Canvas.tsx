@@ -13,7 +13,7 @@ import {
   type Node,
   addEdge,
   type Connection,
-  Edge
+  type Edge
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -94,6 +94,15 @@ function CanvasInner() {
     [activeTool, setNodes, setEdges],
   );
 
+  const onEdgeClick = useCallback(
+    (_event: React.MouseEvent, edge: Edge) => {
+      if (activeTool !== 'remove') return;
+  
+      setEdges((eds) => eds.filter((e: Edge) => e.id !== edge.id));
+    },
+    [activeTool, setEdges],
+  );
+
   return (
     <ReactFlow
       isValidConnection={isValidConnection}
@@ -103,6 +112,7 @@ function CanvasInner() {
       onNodesChange={onNodesChange}
       onNodeClick={onNodeClick}
       onPaneClick={onPaneClick}
+      onEdgeClick={onEdgeClick}
       fitView
       className={
         activeTool === 'event' || activeTool === 'action'
@@ -115,7 +125,7 @@ function CanvasInner() {
       onConnect={onConnect}
       onEdgesChange={onEdgesChange}
       defaultEdgeOptions={{
-      style: { stroke: 'var(--primary-accent)', strokeWidth: 2 },
+      style: { stroke: 'var(--primary-accent)', strokeWidth: 2 }, interactionWidth: 20,
   }}
   connectionLineStyle={{ stroke: 'var(--primary-accent)', strokeWidth: 2 }}
     >

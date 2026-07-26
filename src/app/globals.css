@@ -99,6 +99,56 @@ body {
     border: none;
 }
 
+.start-profile-form {
+    width: 280px;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--deep-purple);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.start-profile-form__title {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.start-node__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.start-node__field span {
+    color: var(--text-muted);
+}
+
+.start-profile-form .form-control,
+.start-profile-form .form-select {
+    background: var(--bg);
+    border-color: var(--deep-purple);
+    color: var(--text);
+}
+
+.start-profile-form .form-control:focus,
+.start-profile-form .form-select:focus {
+    background: var(--bg);
+    border-color: var(--primary-accent);
+    color: var(--text);
+    box-shadow: 0 0 0 0.2rem rgba(155, 77, 255, 0.25);
+}
+
+.start-node {
+    cursor: pointer;
+}
+
 /* --- Toolbar --- */
 .toolbar {
     display: flex;
@@ -218,7 +268,7 @@ body {
 
 .canvas--removing {
     cursor: crosshair;
-  }
+}
 
 .node-handle {
     width: 1px;
@@ -230,4 +280,69 @@ body {
 
 .react-flow__node:hover .node-handle {
     opacity: 1;
+}
+
+.action-node {
+    cursor: pointer;
+}
+
+.action-form,
+.event-form {
+    width: 260px;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--deep-purple);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.action-form__field,
+.event-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.action-form__field span,
+.event-form__field span {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.action-form .form-control,
+.event-form .form-control {
+    background: var(--bg);
+    border-color: var(--deep-purple);
+    color: var(--text);
+    resize: vertical;
+}
+
+.action-form .form-control:focus,
+.event-form .form-control:focus {
+    background: var(--bg);
+    border-color: var(--primary-accent);
+    color: var(--text);
+    box-shadow: 0 0 0 0.2rem rgba(155, 77, 255, 0.25);
+}
+
+.action-form__counter,
+.event-form__counter {
+    align-self: flex-end;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.canvas--removing .react-flow__edge {
+    cursor: pointer;
+}
+
+.canvas--removing .react-flow__edge:hover .react-flow__edge-path {
+    stroke: #ff6b6b;
+    stroke-width: 3;
 }
