@@ -23,71 +23,71 @@ body {
 /* React Flow — dark theme overrides */
 .react-flow {
     background-color: var(--bg);
-  }
-  
-  .react-flow__node {
+}
+
+.react-flow__node {
     background: var(--surface);
     color: var(--text);
     border: 1px solid var(--deep-purple);
     border-radius: var(--radius);
     padding: 10px 16px;
     font-size: 14px;
-  }
-  
-  .react-flow__node.selected {
+}
+
+.react-flow__node.selected {
     border-color: var(--primary-accent);
     box-shadow: 0 0 0 1px var(--primary-accent);
-  }
-  
-  .react-flow__controls button {
+}
+
+.react-flow__controls button {
     background: var(--surface);
     color: var(--text);
     border-color: var(--deep-purple);
-  }
-  
-  .react-flow__controls button:hover {
+}
+
+.react-flow__controls button:hover {
     background: var(--deep-purple);
-  }
-  
-  .react-flow__edge-path {
+}
+
+.react-flow__edge-path {
     stroke: var(--primary-accent);
-  }
+}
 
 .react-flow__node.start-node {
     background: transparent;
     border: none;
     padding: 0;
     box-shadow: none;
-  }
-  
-  .react-flow__node.start-node.selected {
+}
+
+.react-flow__node.start-node.selected {
     border: none;
     box-shadow: none;
-  }
-  
-  .start-node {
+}
+
+.start-node {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
-  }
-  
-  .start-node__label {
+}
+
+.start-node__label {
     font-size: 18px;
     font-weight: 700;
     color: var(--text);
     text-transform: lowercase;
     line-height: 1;
-  }
-  
-  .start-node__dot {
+}
+
+.start-node__dot {
     width: 52px;
     height: 52px;
     border-radius: 50%;
     background: var(--accent);
-  }
-  
-  .start-node__handle {
+}
+
+.start-node__handle {
     opacity: 0;
     bottom: -4px;
-  }
+}
