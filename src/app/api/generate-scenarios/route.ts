@@ -9,9 +9,11 @@ const anthropic = new Anthropic({
 });
 
 type RequestBody = {
-  profile: StartProfile;
-  branch: BranchNode[];
-  anchorNodeId: string;
+    profile: StartProfile;
+    branch: BranchNode[];
+    startNodeId: string;
+    goalNodeId: string;
+    goalText: string;
 };
 
 const SYSTEM_PROMPT = `You are a life scenario planner.
@@ -26,24 +28,30 @@ Schema:
         { "id": "n1", "type": "event" | "action", "text": "string" }
       ],
       "edges": [
-        { "source": "anchor", "target": "n1" }
+        { "source": "start", "target": "n1" },
+        { "source": "n1", "target": "n2" },
+        { "source": "nN", "target": "goal" }
       ]
     }
   ]
 }
 
 Rules:
-- Generate exactly 2 scenarios
-- Each scenario: 3-5 NEW nodes (continuations only, do not repeat the existing path)
+- Generate exactly 1 scenario
+- Generate 3-5 NEW nodes (only events and actions)
+- Build ONE linear path FROM "start" TO "goal"
+- "start" = the left anchor node (already on the canvas) — do NOT include it in "nodes"
+- "goal" = the target goal — do NOT include it in "nodes"
+- First edge MUST be { "source": "start", "target": "n1" }
+- Last edge MUST be { "source": "nN", "target": "goal" } where nN is the last node id
+- Middle edges connect sequentially: n1→n2, n2→n3, etc.
 - "event" = external things that happen TO the person
 - "action" = decisions the person makes
-- First edge of each scenario MUST be { "source": "anchor", "target": "n1" }
-- Use "anchor" as source id in the first edge — the client will map it to the real node
-- Node ids must be unique within a scenario (n1, n2, n3...)
-- The 2 scenarios must be meaningfully different (not minor variations)
+- Node ids must be unique within the scenario (n1, n2, n3...)
 - Be specific to the user's profile (city, profession, income, savings, age)
-- Continue logically from the existing life path provided by the user
-- Text should be short (max 80 chars per node)`;
+- Continue logically from the existing life path and lead toward the target goal
+- Text should be short (max 80 chars per node)
+- Do NOT repeat nodes from the existing path`;
 
 function formatBranch(branch: BranchNode[]): string {
   return branch
@@ -65,17 +73,16 @@ function formatProfile(profile: StartProfile): string {
 - Profession: ${profile.profession}
 - Income: ${profile.income}
 - Savings: ${profile.savings}
-- Activity: ${profile.activityLevel || 'not specified'}
-- Goal: ${profile.goals}`;
+- Activity: ${profile.activityLevel || 'not specified'}`;
 }
 
 export async function POST(request: Request) {
   try {
     const body: RequestBody = await request.json();
-    const { profile, branch, anchorNodeId } = body;
+    const { profile, branch, startNodeId, goalNodeId, goalText } = body;
 
-    if (!profile?.goals?.trim()) {
-      return NextResponse.json({ error: 'Goal is required' }, { status: 400 });
+    if (!goalText?.trim()) {
+      return NextResponse.json({ error: 'Goal text is required' }, { status: 400 });
     }
 
     if (!Array.isArray(branch) || branch.length === 0) {
@@ -89,17 +96,17 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!anchorNodeId?.trim()) {
+    if (!startNodeId?.trim() || !goalNodeId?.trim()) {
       return NextResponse.json(
-        { error: 'anchorNodeId is required' },
+        { error: 'startNodeId and goalNodeId are required' },
         { status: 400 },
       );
     }
 
     const lastBranchNode = branch[branch.length - 1];
-    if (lastBranchNode.id !== anchorNodeId) {
+    if (lastBranchNode.id !== startNodeId) {
       return NextResponse.json(
-        { error: 'anchorNodeId must match the last node in branch' },
+        { error: 'startNodeId must match the last node in branch' },
         { status: 400 },
       );
     }
@@ -118,13 +125,16 @@ export async function POST(request: Request) {
           role: 'user',
           content: `${profileText}
 
-Current life path (already happened):
+Current life path (context):
 ${branchText}
 
-The user placed a "glimpse" marker at the end of this path.
-Generate 2 alternative continuations FROM this point forward.
+The left anchor node (use id "start" in edges) describes the current situation.
+Target goal (use id "goal" in the last edge): ${goalText}
+
+Generate 1 path of 3-5 events/actions that logically connects the starting point to the target goal.
 Do NOT repeat nodes from the current path.
-Start each new scenario from "anchor".`,
+First edge: { "source": "start", "target": "n1" }
+Last edge MUST end with { "source": "nN", "target": "goal" }`,
         },
       ],
     });
@@ -162,6 +172,8 @@ function parseScenariosJson(raw: string): GenerateScenariosResponse | null {
       return null;
     }
 
+    data.scenarios = data.scenarios.slice(0, 1);
+
     for (const scenario of data.scenarios) {
       if (
         !scenario.title ||
@@ -183,11 +195,10 @@ function parseScenariosJson(raw: string): GenerateScenariosResponse | null {
         }
       }
 
-      // первая связь должна начинаться с "anchor"
       const firstEdge = scenario.edges[0];
-      if (firstEdge?.source !== 'anchor' || !firstEdge?.target) {
-        return null;
-      }
+      const lastEdge = scenario.edges[scenario.edges.length - 1];
+      if (firstEdge?.source !== 'start' || !firstEdge?.target) return null;
+      if (lastEdge?.target !== 'goal') return null;
     }
 
     return data;

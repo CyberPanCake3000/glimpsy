@@ -25,15 +25,18 @@ import { TooltipProvider, useTooltip } from '@/contexts/TooltipContext';
 import { ScenarioProvider, useScenario } from '@/contexts/ScenarioContext';
 import type { ApplyScenariosPayload } from '@/contexts/ScenarioContext';
 import GlimpseNode from '@/components/nodes/GlimpseNode';
+import GoalNode from '@/components/nodes/GoalNode';
 import { ProfileProvider } from '@/contexts/ProfileContext';
 import { collectBranch } from '@/lib/collectBranch';
 import { useProfile } from '@/contexts/ProfileContext';
+import { getGlimpseBridge } from '@/lib/glimpseBridge';
 
 const nodeTypes = {
   start: StartNode,
   event: EventNode,
   action: ActionNode,
   glimpse: GlimpseNode,
+  goal: GoalNode,
 };
 
 const initialNodes: Node[] = [
@@ -59,37 +62,32 @@ function CanvasInner() {
 
   useEffect(() => {
     registerApplyScenarios((data: ApplyScenariosPayload) => {
-      const { scenarios, anchorNodeId, glimpseNodeId } = data;
+      const { scenarios, startNodeId, goalNodeId, glimpseNodeId } = data;
+      const scenario = scenarios[0];
+      if (!scenario) return;
   
       setNodes((currentNodes) => {
-        const anchor = currentNodes.find((n) => n.id === anchorNodeId);
-        const glimpse = currentNodes.find((n) => n.id === glimpseNodeId);
-        if (!anchor) return currentNodes;
-  
-        const baseX = anchor.position.x + 180;
-        const baseY = anchor.position.y;
+        const startNode = currentNodes.find((n) => n.id === startNodeId);
+        const goalNode = currentNodes.find((n) => n.id === goalNodeId);
+        if (!startNode || !goalNode) return currentNodes;
   
         const keptNodes = currentNodes.filter((n) => n.id !== glimpseNodeId);
-        const generatedNodes: Node[] = [];
+        const prefix = `${startNodeId}-bridge`;
+        const nodeCount = scenario.nodes.length;
+        const gap = goalNode.position.x - startNode.position.x;
+        const step = gap / (nodeCount + 1);
   
-        scenarios.forEach((scenario, scenarioIndex) => {
-          const prefix = `${anchorNodeId}-s${scenarioIndex}`;
-          const offsetY =
-            baseY + scenarioIndex * 200 - ((scenarios.length - 1) * 100);
+        const generatedNodes: Node[] = scenario.nodes.map((n, index) => ({
+          id: `${prefix}-${n.id}`,
+          type: n.type,
+          position: {
+            x: startNode.position.x + step * (index + 1),
+            y: startNode.position.y,
+          },
+          data: { text: n.text },
+          className: n.type === 'event' ? 'event-node' : 'action-node',
+        }));
   
-          scenario.nodes.forEach((n, index) => {
-            generatedNodes.push({
-              id: `${prefix}-${n.id}`,
-              type: n.type,
-              position: { x: baseX + index * 180, y: offsetY },
-              data: { text: n.text, scenarioTitle: scenario.title },
-              className: n.type === 'event' ? 'event-node' : 'action-node',
-            });
-          });
-        });
-        console.log('nodes before:', currentNodes.length);
-        console.log('kept:', keptNodes.length);
-        console.log('generated:', generatedNodes.length); 
         return [...keptNodes, ...generatedNodes];
       });
   
@@ -98,22 +96,18 @@ function CanvasInner() {
           (e) => e.source !== glimpseNodeId && e.target !== glimpseNodeId,
         );
   
-        const newEdges: Edge[] = [];
-  
-        scenarios.forEach((scenario, scenarioIndex) => {
-          const prefix = `${anchorNodeId}-s${scenarioIndex}`;
-  
-          scenario.edges.forEach((e, i) => {
-            newEdges.push({
-              id: `${prefix}-e${i}`,
-              source:
-                e.source === 'anchor'
-                  ? anchorNodeId
-                  : `${prefix}-${e.source}`,
-              target: `${prefix}-${e.target}`,
-            });
-          });
-        });
+        const prefix = `${startNodeId}-bridge`;
+        const newEdges: Edge[] = scenario.edges.map((e, i) => ({
+          id: `${prefix}-e${i}`,
+          source:
+            e.source === 'start'
+              ? startNodeId
+              : `${prefix}-${e.source}`,
+          target:
+            e.target === 'goal'
+              ? goalNodeId
+              : `${prefix}-${e.target}`,
+        }));
   
         return [...withoutGlimpse, ...newEdges];
       });
@@ -125,27 +119,32 @@ function CanvasInner() {
   const onConnect = useCallback(
     (connection: Connection) => {
       if (!connection.source || !connection.target) return;
-  
       const currentNodes = getNodes();
       const nextEdges = addEdge(connection, getEdges());
-  
+
       setEdges(nextEdges);
-  
-      const targetNode = currentNodes.find((n) => n.id === connection.target);
-      if (targetNode?.type !== 'glimpse') return;
-  
-      const branch = collectBranch(connection.source, currentNodes, nextEdges);
-  
+
+      const glimpseId =
+        currentNodes.find((n) => n.id === connection.target)?.type === 'glimpse'
+          ? connection.target
+          : currentNodes.find((n) => n.id === connection.source)?.type === 'glimpse'
+            ? connection.source
+            : null;
+      if (!glimpseId) return;
+      const bridge = getGlimpseBridge(glimpseId, currentNodes, nextEdges);
+      if (!bridge) return; // второй конец ещё не подключён
+      const branch = collectBranch(bridge.startNodeId, currentNodes, nextEdges);
       if (!branch.some((n) => n.type === 'start')) {
         console.error('Branch must start from start node');
         return;
       }
-  
       generateFromBranch({
         profile,
         branch,
-        anchorNodeId: connection.source,
-        glimpseNodeId: connection.target,
+        startNodeId: bridge.startNodeId,
+        goalNodeId: bridge.goalNodeId,
+        goalText: bridge.goalText,
+        glimpseNodeId: bridge.glimpseNodeId,
       });
     },
     [profile, generateFromBranch, getNodes, getEdges],
@@ -175,6 +174,20 @@ function CanvasInner() {
         return;
       }
 
+      if (activeTool === 'goal') {
+        setNodes((nds) => [
+          ...nds,
+          {
+            id: crypto.randomUUID(),
+            type: 'goal',
+            position,
+            data: {},
+            className: 'goal-node',
+          },
+        ]);
+        return;
+      }
+
       setNodes((nds) => [
         ...nds,
         {
@@ -197,7 +210,9 @@ function CanvasInner() {
             if (targetNode?.type === 'glimpse') {
                 return sourceNode?.type === 'event' || sourceNode?.type === 'action';
             }
-            if (sourceNode?.type === 'glimpse') return false;
+            if (sourceNode?.type === 'glimpse') {
+                return targetNode?.type === 'goal';
+            }
             return true;
         },
         [nodes],
@@ -242,7 +257,10 @@ function CanvasInner() {
           onEdgeClick={onEdgeClick}
           fitView
           className={
-              activeTool === 'event' || activeTool === 'action'
+              activeTool === 'event' ||
+                  activeTool === 'action' ||
+                  activeTool === 'goal' ||
+                  activeTool === 'glimpse'
                   ? 'canvas--drawing'
                   : activeTool === 'remove'
                       ? 'canvas--removing'

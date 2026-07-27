@@ -104,16 +104,6 @@ export default function StartProfileForm({ profile, onChange, onClick}: Props) {
                     <option value="high">High</option>
                 </select>
             </label>
-
-            <label className="start-profile-form__field">
-                <span>Your goals</span>
-                <textarea
-                    className="form-control form-control-sm"
-                    rows={3}
-                    value={profile.goals}
-                    onChange={(e) => updateField('goals', e.target.value)}
-                />
-            </label>
         </form>
     );
 }

@@ -7,16 +7,19 @@ import type { BranchNode } from '@/lib/collectBranch';
 
 /** Что Canvas передаёт при connect к glimpse */
 export type GenerateFromBranchPayload = {
-  profile: StartProfile;
-  branch: BranchNode[];
-  anchorNodeId: string;
-  glimpseNodeId: string;
+    profile: StartProfile;
+    branch: BranchNode[];
+    startNodeId: string;
+    goalNodeId: string;
+    goalText: string;
+    glimpseNodeId: string;
 };
 
 /** Ответ API + метаданные для отрисовки на канвасе */
 export type ApplyScenariosPayload = GenerateScenariosResponse & {
-  anchorNodeId: string;
-  glimpseNodeId: string;
+    startNodeId: string;
+    goalNodeId: string;
+    glimpseNodeId: string;
 };
 
 type ScenarioContextType = {
@@ -40,22 +43,29 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
 
   const generateFromBranch = useCallback(
     async (payload: GenerateFromBranchPayload) => {
-      const { profile, branch, anchorNodeId, glimpseNodeId } = payload;
-
-      if (!profile.goals?.trim()) {
-        console.error('Goal is required in profile');
-        return;
-      }
-
+      const {
+        profile,
+        branch,
+        startNodeId,
+        goalNodeId,
+        goalText,
+        glimpseNodeId,
+      } = payload;
+  
       if (branch.length === 0) {
         console.error('Branch is empty');
         return;
       }
-
+  
+      if (!goalText.trim()) {
+        console.error('Goal text is required');
+        return;
+      }
+  
       if (isGenerating) return;
-
+  
       setIsGenerating(true);
-
+  
       try {
         const res = await fetch('/api/generate-scenarios', {
           method: 'POST',
@@ -63,20 +73,23 @@ export function ScenarioProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({
             profile,
             branch,
-            anchorNodeId,
+            startNodeId,
+            goalNodeId,
+            goalText,
           }),
         });
-
+  
         const data = await res.json();
-
+  
         if (!res.ok || !data.scenarios) {
           console.error('Generation failed:', data.error ?? res.statusText);
           return;
         }
-
+  
         applyRef.current?.({
           ...data,
-          anchorNodeId,
+          startNodeId,
+          goalNodeId,
           glimpseNodeId,
         });
       } catch (error) {

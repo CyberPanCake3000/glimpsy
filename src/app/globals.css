@@ -330,7 +330,8 @@ body {
 }
 
 .action-form .form-control,
-.event-form .form-control {
+.event-form .form-control, 
+.goal-form .form-control {
     background: var(--bg);
     border-color: var(--deep-purple);
     color: var(--text);
@@ -338,7 +339,8 @@ body {
 }
 
 .action-form .form-control:focus,
-.event-form .form-control:focus {
+.event-form .form-control:focus 
+.goal-form .form-control:focus {
     background: var(--bg);
     border-color: var(--primary-accent);
     color: var(--text);
@@ -413,4 +415,73 @@ body {
     outline: 2px solid var(--primary-accent);
     outline-offset: 2px;
     border-radius: 4px;
+}
+
+/* --- Goal node (diamond) --- */
+.react-flow__node.goal-node {
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+}
+
+.react-flow__node.goal-node.selected {
+    box-shadow: none;
+}
+
+.goal-node {
+    cursor: pointer;
+}
+
+.goal-node__shape {
+    width: 48px;
+    height: 48px;
+    background: #fff;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.goal-node__emoji {
+    font-size: 22px;
+    line-height: 1;
+    user-select: none;
+}
+
+.react-flow__node.goal-node.selected .goal-node__shape {
+    outline: 2px solid var(--primary-accent);
+    outline-offset: 2px;
+}
+
+/* Goal form — скопируйте стили event-form и замените классы */
+.goal-form {
+    width: 260px;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--deep-purple);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.goal-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.goal-form__counter {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+.toolbar__preview--diamond {
+    width: 18px;
+    height: 18px;
+    background: var(--text);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
 }

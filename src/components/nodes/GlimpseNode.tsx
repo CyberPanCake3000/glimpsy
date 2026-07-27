@@ -10,7 +10,7 @@ export default function GlimpseNode({ id, data }: NodeProps) {
   return (
     <div className="glimpse-node">
       <Handle type="target" position={Position.Left} className="node-handle" />
-
+      <Handle type="source" position={Position.Right} className="node-handle" />
       <div
         className={`glimpse-node__shape${isThisGenerating ? ' glimpse-node__shape--loading' : ''}`}
         aria-label="glimpse"
