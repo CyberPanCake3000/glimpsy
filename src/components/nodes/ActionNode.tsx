@@ -6,10 +6,10 @@ import ActionForm from '@/components/nodes/ActionForm';
 import { useTooltip } from '@/contexts/TooltipContext';
 import { useEmojiFromText } from '@/hooks/useEmojiFromText';
 
-export default function ActionNode({ id }: NodeProps) {
+export default function ActionNode({ id, data }: NodeProps) {
   const { activeNodeId, toggleTooltip } = useTooltip();
   const showTooltip = activeNodeId === id;
-  const [actionText, setActionText] = useState('');
+  const [actionText, setActionText] = useState((data.text as string) ?? '');
   const { emoji, loading } = useEmojiFromText(actionText, 'action');
 
   const handleClick = () => {

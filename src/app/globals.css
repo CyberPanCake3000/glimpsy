@@ -360,3 +360,57 @@ body {
     stroke: #ff6b6b;
     stroke-width: 3;
 }
+
+/* --- Glimpse node --- */
+.react-flow__node.glimpse-node {
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+}
+
+.react-flow__node.glimpse-node.selected {
+    box-shadow: none;
+}
+
+.glimpse-node {
+    cursor: pointer;
+}
+
+.glimpse-node__shape {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.glimpse-node__shape--loading {
+    animation: glimpse-pulse 1s ease-in-out infinite;
+}
+
+.glimpse-node__icon {
+    font-size: 28px;
+    color: var(--accent);
+    line-height: 1;
+    filter: drop-shadow(0 0 6px rgba(242, 200, 62, 0.45));
+}
+
+@keyframes glimpse-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}
+
+.react-flow__node.glimpse-node.selected .glimpse-node__shape {
+    outline: 2px solid var(--primary-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+}

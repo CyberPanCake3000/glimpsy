@@ -1,15 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import { Handle, NodeToolbar, Position, type NodeProps } from '@xyflow/react';
 import StartProfileForm from '@/components/nodes/StartProfileForm';
-import { emptyStartProfile, type StartProfile } from '@/types/startProfile';
 import { useTooltip } from '@/contexts/TooltipContext';
+import { useProfile } from '@/contexts/ProfileContext';
 
 export default function StartNode({ id, data }: NodeProps) {
   const { activeNodeId, toggleTooltip } = useTooltip();
   const showTooltip = activeNodeId === id;
-  const [profile, setProfile] = useState<StartProfile>(emptyStartProfile);
+  const { profile, setProfile } = useProfile();
   const handleClick = () => {
     toggleTooltip(id);
   };

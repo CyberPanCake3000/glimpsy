@@ -6,10 +6,10 @@ import { useState } from 'react';
 import { useTooltip } from '@/contexts/TooltipContext';
 import { useEmojiFromText } from '@/hooks/useEmojiFromText';
 
-export default function EventNode({ id }: NodeProps) {
+export default function EventNode({ id, data }: NodeProps) {
   const { activeNodeId, toggleTooltip } = useTooltip();
   const showTooltip = activeNodeId === id;
-  const [eventText, setEventText] = useState('');
+  const [eventText, setEventText] = useState((data.text as string) ?? '');
   const { emoji, loading } = useEmojiFromText(eventText, 'event');
 
   const handleClick = () => {
