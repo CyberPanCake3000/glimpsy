@@ -236,6 +236,10 @@ function CanvasInner() {
     [activeTool, setNodes, setEdges],
   );
 
+  const onNodeDragStart = useCallback(() => {
+    closeTooltip();
+  }, [closeTooltip]);
+
   const onEdgeClick = useCallback(
     (_event: React.MouseEvent, edge: Edge) => {
       if (activeTool !== 'remove') return;
@@ -255,6 +259,7 @@ function CanvasInner() {
           onNodeClick={onNodeClick}
           onPaneClick={onPaneClick}
           onEdgeClick={onEdgeClick}
+          onNodeDragStart={onNodeDragStart}
           fitView
           className={
               activeTool === 'event' ||
