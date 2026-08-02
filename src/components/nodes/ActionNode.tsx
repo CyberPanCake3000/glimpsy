@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Handle, NodeToolbar, Position, type NodeProps } from '@xyflow/react';
+import { useCallback, useState } from 'react';
+import { Handle, NodeToolbar, Position, type NodeProps, useReactFlow } from '@xyflow/react';
 import ActionForm from '@/components/nodes/ActionForm';
 import { useTooltip } from '@/contexts/TooltipContext';
 import { useEmojiFromText } from '@/hooks/useEmojiFromText';
@@ -10,7 +10,24 @@ export default function ActionNode({ id, data }: NodeProps) {
   const { activeNodeId, hoveredNodeId, setHoveredNodeId, scheduleHoverClose, cancelHoverClose, toggleTooltip } = useTooltip();
   const showToolbar = activeNodeId === id || hoveredNodeId === id;
   const [actionText, setActionText] = useState((data.text as string) ?? '');
-  const { emoji, loading } = useEmojiFromText(actionText, 'action');
+  const { updateNodeData } = useReactFlow();
+
+  const persistEmoji = useCallback(
+    (emoji: string | null) => {
+      updateNodeData(id, { emoji: emoji ?? undefined });
+    },
+    [id, updateNodeData],
+  );
+
+  const handleChange = (value: string) => {
+    setActionText(value);
+    updateNodeData(id, { text: value, emoji: undefined });
+  };
+
+  const { emoji, loading } = useEmojiFromText(actionText, 'action', {
+    cachedEmoji: (data.emoji as string) ?? null,
+    onEmojiChange: persistEmoji,
+  });
 
   const handleClick = () => {
     toggleTooltip(id);
@@ -39,7 +56,7 @@ export default function ActionNode({ id, data }: NodeProps) {
       >
         <ActionForm
           value={actionText}
-          onChange={setActionText}
+          onChange={handleChange}
           onClick={handleFormClick}
         />
       </div>

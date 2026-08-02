@@ -1,7 +1,7 @@
 'use client';
 
 import { Handle, NodeToolbar, Position, type NodeProps } from '@xyflow/react';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useTooltip } from '@/contexts/TooltipContext';
 import { useEmojiFromText } from '@/hooks/useEmojiFromText';
 import GoalForm from './GoalForm';
@@ -11,8 +11,14 @@ export default function GoalNode({ id, data }: NodeProps) {
   const { activeNodeId, hoveredNodeId, setHoveredNodeId, scheduleHoverClose, cancelHoverClose, toggleTooltip } = useTooltip();
   const showToolbar = activeNodeId === id || hoveredNodeId === id;
   const [goalText, setGoalText] = useState((data.text as string) ?? '');
-  const { emoji, loading } = useEmojiFromText(goalText, 'action');
   const { updateNodeData } = useReactFlow();
+
+  const persistEmoji = useCallback(
+    (emoji: string | null) => {
+      updateNodeData(id, { emoji: emoji ?? undefined });
+    },
+    [id, updateNodeData],
+  );
 
   const handleClick = () => {
     toggleTooltip(id);
@@ -22,9 +28,15 @@ export default function GoalNode({ id, data }: NodeProps) {
     event.stopPropagation();
   };
 
+  const { emoji, loading } = useEmojiFromText(goalText, 'goal', {
+    cachedEmoji: (data.emoji as string) ?? null,
+    onEmojiChange: persistEmoji,
+  });
+
+  
   const handleChange = (value: string) => {
     setGoalText(value);
-    updateNodeData(id, { text: value });
+    updateNodeData(id, { text: value, emoji: undefined });
   };
 
   return (

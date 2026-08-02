@@ -1,15 +1,38 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-export function useEmojiFromText(text: string, nodeType: 'event' | 'action') {
-  const [emoji, setEmoji] = useState<string | null>(null);
+type Options = {
+  cachedEmoji?: string | null;
+  onEmojiChange?: (emoji: string | null) => void;
+};
+
+export function useEmojiFromText(
+  text: string,
+  nodeType: 'event' | 'action' | 'goal',
+  options?: Options,
+) {
+  const cachedEmoji = options?.cachedEmoji;
+  const onEmojiChange = options?.onEmojiChange;
+  const [emoji, setEmoji] = useState<string | null>(cachedEmoji ?? null);
   const [loading, setLoading] = useState(false);
+  const skipFetchOnceRef = useRef(Boolean(cachedEmoji));
+  const initialCachedEmojiRef = useRef(options?.cachedEmoji);
+  const onEmojiChangeRef = useRef(options?.onEmojiChange);
+  onEmojiChangeRef.current = options?.onEmojiChange;
 
   useEffect(() => {
     const trimmed = text.trim();
     if (trimmed.length < 3) {
       setEmoji(null);
+      onEmojiChangeRef.current?.(null);
+      skipFetchOnceRef.current = false;
+      return;
+    }
+
+    if (skipFetchOnceRef.current && initialCachedEmojiRef.current) {
+      skipFetchOnceRef.current = false;
+      setEmoji(initialCachedEmojiRef.current);
       return;
     }
 
@@ -22,9 +45,12 @@ export function useEmojiFromText(text: string, nodeType: 'event' | 'action') {
           body: JSON.stringify({ text: trimmed, nodeType }),
         });
         const data = await res.json();
-        setEmoji(data.emoji ?? null);
+        const nextEmoji = data.emoji ?? null;
+        setEmoji(nextEmoji);
+        onEmojiChangeRef.current?.(nextEmoji);
       } catch {
         setEmoji(null);
+        onEmojiChange?.(null);
       } finally {
         setLoading(false);
       }

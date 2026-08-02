@@ -1,8 +1,8 @@
 'use client';
 
-import { Handle, Position, type NodeProps, NodeToolbar } from '@xyflow/react';
+import { Handle, Position, type NodeProps, NodeToolbar, useReactFlow } from '@xyflow/react';
 import EventForm from '@/components/nodes/EventForm';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useTooltip } from '@/contexts/TooltipContext';
 import { useEmojiFromText } from '@/hooks/useEmojiFromText';
 
@@ -10,7 +10,14 @@ export default function EventNode({ id, data }: NodeProps) {
   const { activeNodeId, hoveredNodeId, setHoveredNodeId, scheduleHoverClose, cancelHoverClose, toggleTooltip } = useTooltip();
   const showToolbar = activeNodeId === id || hoveredNodeId === id;
   const [eventText, setEventText] = useState((data.text as string) ?? '');
-  const { emoji, loading } = useEmojiFromText(eventText, 'event');
+  const { updateNodeData } = useReactFlow();
+
+  const persistEmoji = useCallback(
+    (emoji: string | null) => {
+      updateNodeData(id, { emoji: emoji ?? undefined });
+    },
+    [id, updateNodeData],
+  );
 
   const handleClick = () => {
     toggleTooltip(id);
@@ -19,16 +26,27 @@ export default function EventNode({ id, data }: NodeProps) {
   const handleFormClick = (event: React.MouseEvent) => {
     event.stopPropagation();
   };
+
+  const { emoji, loading } = useEmojiFromText(eventText, 'event', {
+    cachedEmoji: (data.emoji as string) ?? null,
+    onEmojiChange: persistEmoji,
+  });
+
+  const handleChange = (value: string) => {
+    setEventText(value);
+    updateNodeData(id, { text: value, emoji: undefined });
+  };
+
   return (
     <div
-    className="event-node"
-    onClick={handleClick}
-    onMouseEnter={() => {
-      cancelHoverClose();
-      setHoveredNodeId(id);
-    }}
-    onMouseLeave={() => scheduleHoverClose(id)}
-  >
+      className="event-node"
+      onClick={handleClick}
+      onMouseEnter={() => {
+        cancelHoverClose();
+        setHoveredNodeId(id);
+      }}
+      onMouseLeave={() => scheduleHoverClose(id)}
+    >
       <NodeToolbar isVisible={showToolbar} position={Position.Left} offset={16}>
       <div
         onMouseEnter={cancelHoverClose}
@@ -38,7 +56,7 @@ export default function EventNode({ id, data }: NodeProps) {
       >
         <EventForm
           value={eventText}
-          onChange={setEventText}
+          onChange={handleChange}
           onClick={handleFormClick}
         />
       </div>

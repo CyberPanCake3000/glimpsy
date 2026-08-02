@@ -485,3 +485,93 @@ body {
     background: var(--text);
     clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
 }
+
+.share-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .share-modal {
+    position: relative;
+    width: min(480px, 92vw);
+    background: var(--surface);
+    border: 1px solid var(--deep-purple);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  
+  .share-modal__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  
+  .share-modal__title {
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+  }
+  
+  .share-modal__section + .share-modal__section {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--deep-purple);
+  }
+  
+  .share-modal__section h3 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  
+  .share-modal__hint {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-bottom: 12px;
+  }
+  
+  .share-modal__btn {
+    background: var(--primary-accent);
+    color: var(--text);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+  }
+  
+  .share-modal__btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  .share-modal__link-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  
+  .share-modal__input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--deep-purple);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 8px 12px;
+  }
+  
+  .share-modal__error {
+    color: #ff6b6b;
+    margin-top: 8px;
+    font-size: 0.875rem;
+  }
+  
+  .toolbar__btn--share {
+    margin-left: 8px;
+  }

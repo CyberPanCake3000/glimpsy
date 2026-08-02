@@ -10,8 +10,8 @@ type ProfileContextType = {
 
 const ProfileContext = createContext<ProfileContextType | null>(null);
 
-export function ProfileProvider({ children }: { children: React.ReactNode }) {
-  const [profile, setProfile] = useState<StartProfile>(emptyStartProfile);
+export function ProfileProvider({ children, initialProfile = emptyStartProfile, }: { children: React.ReactNode, initialProfile?: StartProfile }) {
+  const [profile, setProfile] = useState<StartProfile>(initialProfile);
   return (
     <ProfileContext.Provider value={{ profile, setProfile }}>
       {children}

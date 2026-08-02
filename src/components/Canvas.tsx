@@ -30,6 +30,13 @@ import { ProfileProvider } from '@/contexts/ProfileContext';
 import { collectBranch } from '@/lib/collectBranch';
 import { useProfile } from '@/contexts/ProfileContext';
 import { getGlimpseBridge } from '@/lib/glimpseBridge';
+import ShareModal from '@/components/ShareModal';
+import { buildSharedSchema } from '@/lib/serializeSchema';
+import type { SharedSchema } from '@/types/sharedSchema';
+
+type CanvasInnerProps = {
+  initialSchema?: SharedSchema | null;
+};
 
 const nodeTypes = {
   start: StartNode,
@@ -50,9 +57,15 @@ const initialNodes: Node[] = [
   },
 ];
 
-function CanvasInner() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+function CanvasInner({ initialSchema = null }: CanvasInnerProps) {
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareSchema, setShareSchema] = useState<SharedSchema | null>(null);
+  const [nodes, setNodes, onNodesChange] = useNodesState(
+    (initialSchema?.nodes as Node[]) ?? initialNodes,
+  );
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(
+    initialSchema?.edges ?? [],
+  );
   const [activeTool, setActiveTool] = useState<Tool>(null);
   const { screenToFlowPosition, fitView, getNodes, getEdges } = useReactFlow();
   const { closeTooltip } = useTooltip();
@@ -141,6 +154,11 @@ function CanvasInner() {
       setTimeout(() => fitView({ padding: 0.2, duration: 300 }), 50);
     });
   }, [registerApplyScenarios, setNodes, setEdges, fitView]);
+
+  useEffect(() => {
+    if (!initialSchema) return;
+    setTimeout(() => fitView({ padding: 0.2, duration: 300 }), 50);
+  }, [initialSchema, fitView]);
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -275,53 +293,67 @@ function CanvasInner() {
     [activeTool, setEdges],
   );
 
-  return (
-      <ReactFlow
-          isValidConnection={isValidConnection}
-          nodeOrigin={[0.5, 0.5]}
-          nodeTypes={nodeTypes}
-          nodes={nodes}
-          onNodesChange={onNodesChange}
-          onNodeClick={onNodeClick}
-          onPaneClick={onPaneClick}
-          onEdgeClick={onEdgeClick}
-          onNodeDragStart={onNodeDragStart}
-          fitView
-          className={
-              activeTool === 'event' ||
-                  activeTool === 'action' ||
-                  activeTool === 'goal' ||
-                  activeTool === 'glimpse'
-                  ? 'canvas--drawing'
-                  : activeTool === 'remove'
-                      ? 'canvas--removing'
-                      : undefined
-          }
-          edges={edges}
-          onConnect={onConnect}
-          onEdgesChange={onEdgesChange}
-          defaultEdgeOptions={{
-              style: { stroke: 'var(--primary-accent)', strokeWidth: 2 }, interactionWidth: 20,
-          }}
-          connectionLineStyle={{ stroke: 'var(--primary-accent)', strokeWidth: 2 }}
-      >
-          <Background gap={20} size={1} color="var(--text-muted)" />
-          <Controls />
+  const handleShareClick = () => {
+    const schema = buildSharedSchema(getNodes(), getEdges(), profile);
+    setShareSchema(schema);
+    setShareOpen(true);
+  };
 
-          <Panel position="top-left">
-              <Toolbar activeTool={activeTool} onSelect={setActiveTool} />
-          </Panel>
+  return (
+    <>
+      <ReactFlow
+        isValidConnection={isValidConnection}
+        nodeOrigin={[0.5, 0.5]}
+        nodeTypes={nodeTypes}
+        nodes={nodes}
+        onNodesChange={onNodesChange}
+        onNodeClick={onNodeClick}
+        onPaneClick={onPaneClick}
+        onEdgeClick={onEdgeClick}
+        onNodeDragStart={onNodeDragStart}
+        fitView
+        className={
+          activeTool === 'event' ||
+            activeTool === 'action' ||
+            activeTool === 'goal' ||
+            activeTool === 'glimpse'
+            ? 'canvas--drawing'
+            : activeTool === 'remove'
+              ? 'canvas--removing'
+              : undefined
+        }
+        edges={edges}
+        onConnect={onConnect}
+        onEdgesChange={onEdgesChange}
+        defaultEdgeOptions={{
+          style: { stroke: 'var(--primary-accent)', strokeWidth: 2 }, interactionWidth: 20,
+        }}
+        connectionLineStyle={{ stroke: 'var(--primary-accent)', strokeWidth: 2 }}
+      >
+        <Background gap={20} size={1} color="var(--text-muted)" />
+        <Controls />
+
+        <Panel position="top-left">
+          <Toolbar activeTool={activeTool} onSelect={setActiveTool} onShareClick={handleShareClick}/>
+        </Panel>
       </ReactFlow>
+
+      <ShareModal
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        schema={shareSchema}
+      />
+    </>
   );
 }
 
-export default function Canvas() {
+export default function Canvas({ initialSchema }: { initialSchema?: SharedSchema | null }) {
     return (
         <ReactFlowProvider>
-            <ProfileProvider>
+            <ProfileProvider initialProfile={initialSchema?.profile}>
                 <ScenarioProvider>
                     <TooltipProvider>
-                        <CanvasInner />
+                        <CanvasInner initialSchema={initialSchema}/>
                     </TooltipProvider>
                 </ScenarioProvider>
             </ProfileProvider>
