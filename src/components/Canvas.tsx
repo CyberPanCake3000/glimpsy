@@ -73,22 +73,48 @@ function CanvasInner() {
   
         const keptNodes = currentNodes.filter((n) => n.id !== glimpseNodeId);
         const prefix = `${startNodeId}-bridge`;
+
+        const MIN_NODE_STEP = 100;
+
         const nodeCount = scenario.nodes.length;
-        const gap = goalNode.position.x - startNode.position.x;
-        const step = gap / (nodeCount + 1);
-  
-        const generatedNodes: Node[] = scenario.nodes.map((n, index) => ({
-          id: `${prefix}-${n.id}`,
-          type: n.type,
-          position: {
-            x: startNode.position.x + step * (index + 1),
-            y: startNode.position.y,
-          },
-          data: { text: n.text },
-          className: n.type === 'event' ? 'event-node' : 'action-node',
-        }));
-  
-        return [...keptNodes, ...generatedNodes];
+        const slots = nodeCount + 1;
+        const currentGap = goalNode.position.x - startNode.position.x;
+        const requiredGap = slots * MIN_NODE_STEP;
+        const gap = Math.max(currentGap, requiredGap);
+        const goalShift = gap - currentGap;
+
+        const newGoalX = startNode.position.x + gap;
+        const oldGoalX = goalNode.position.x;
+        const startX = startNode.position.x;
+        const startY = startNode.position.y;
+        const endX = newGoalX;
+        const endY = goalNode.position.y;
+
+        const generatedNodes: Node[] = scenario.nodes.map((n, index) => {
+          const t = (index + 1) / slots;
+          return {
+            id: `${prefix}-${n.id}`,
+            type: n.type,
+            position: {
+              x: startX + (endX - startX) * t,
+              y: startY + (endY - startY) * t,
+            },
+            data: { text: n.text },
+            className: n.type === 'event' ? 'event-node' : 'action-node',
+          };
+        });
+
+        const updatedKeptNodes = keptNodes.map((n) => {
+          if (n.id === goalNodeId) {
+            return { ...n, position: { x: newGoalX, y: n.position.y } };
+          }
+          if (goalShift > 0 && n.position.x > oldGoalX) {
+            return { ...n, position: { x: n.position.x + goalShift, y: n.position.y } };
+          }
+          return n;
+        });
+
+        return [...updatedKeptNodes, ...generatedNodes];
       });
   
       setEdges((currentEdges) => {
