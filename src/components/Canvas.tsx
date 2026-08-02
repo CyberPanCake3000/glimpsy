@@ -208,7 +208,7 @@ function CanvasInner() {
             const sourceNode = nodes.find((n) => n.id === connection.source);
             const targetNode = nodes.find((n) => n.id === connection.target);
             if (targetNode?.type === 'glimpse') {
-                return sourceNode?.type === 'event' || sourceNode?.type === 'action';
+                return sourceNode?.type === 'event' || sourceNode?.type === 'action' || sourceNode?.type === 'start';
             }
             if (sourceNode?.type === 'glimpse') {
                 return targetNode?.type === 'goal';

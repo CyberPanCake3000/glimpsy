@@ -20,7 +20,7 @@ export function getGlimpseBridge(
     const goalNode = nodes.find((n) => n.id === outgoing.target);
 
     if (!startNode || !goalNode) return null;
-    if (startNode.type !== 'event' && startNode.type !== 'action') return null;
+    if (startNode.type !== 'event' && startNode.type !== 'action' && startNode.type !== 'start') return null;
     if (goalNode.type !== 'goal') return null;
 
     const goalText = (goalNode.data?.text as string)?.trim();
